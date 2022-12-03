@@ -1,0 +1,37 @@
+{
+  "name": "poms",
+  "version": "1.0.0",
+  "description": "blockchain based product ownership management system",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "test",
+    "start": "DEBUG=debug:* node src/index.js",
+    "dev": "nodemon -r dotenv/config src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phyokyawdev/poms.git"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "nodejs"
+  ],
+  "author": "Phyo Kyaw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phyokyawdev/poms/issues"
+  },
+  "homepage": "https://github.com/phyokyawdev/poms#readme",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "http-errors": "^2.0.0",
+    "ip": "^1.1.8"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "nodemon": "^2.0.20"
+  }
+}
