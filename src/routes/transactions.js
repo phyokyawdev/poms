@@ -1,25 +1,32 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const { nodeType } = require('../config/keys');
 
 /**
- * HANDLE TRANSACTIONS
- * (if MAIN node)
- * 1. validate transactions
- * 2. pool transactions
- * 3. start mining
- * 4. update state
- * 5. broadcast new block to network
- *
- * (if not Main node)
- * 1. validate transactions
- * 2. send transaction to MAIN node
+ * CLIENT WILL CREATE NEW TRANSACTIONS
+ * SIGNED WITH PRIVATE KEY.
  */
-router.post("/", async (req, res) => {
-  // validate transaction
-  // pool transactions
-  // start mining
+router.post('/', async (req, res) => {
+  /**
+   * FOR SIDE NODE
+   */
+  if (nodeType !== 'main') {
+    // validate tx
+
+    // send tx to main node
+
+    return res.status(200).send('Submitted transaction to main node');
+  }
+
+  /**
+   * FOR MAIN NODE
+   */
+
+  // validate tx
   // update state
+  // start mining
   // broadcast new block to network
+  return res.status(201).send('Transaction created');
 });
 
 module.exports = router;

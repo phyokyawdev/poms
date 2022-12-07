@@ -1,11 +1,11 @@
-const debug = require("debug")("debug:index");
-const ip = require("ip");
-const app = require("./app");
+#!/usr/bin/env node
+
+const log = require('debug')('info:index');
+const ip = require('ip');
+const keys = require('./config/keys');
+const app = require('./app');
 
 const IP_ADDRESS = ip.address();
-const PORT = process.env.PORT || 3000;
-const BLOCKCHAIN_NODE_TYPE = process.env.BLOCKCHAIN_NODE_TYPE;
-const MAIN_NODE_URL = process.env.MAIN_NODE_URL;
 
 /**
  * THIS VERSION WILL USE POA CONSENSUS MECHANISM
@@ -19,23 +19,28 @@ const MAIN_NODE_URL = process.env.MAIN_NODE_URL;
  */
 
 const start = async () => {
-  if (BLOCKCHAIN_NODE_TYPE === "MAIN") {
-    debug("Starting as MAIN node...");
-  } else {
-    debug(`Starting as SIDE node...`);
-    if (!MAIN_NODE_URL) {
-      debug(`MAIN_NODE_URL is not provided, exiting...`);
-      return;
-    }
-
-    // register SIDE node to MAIN node
-
-    // download all blocks
+  if (keys.nodeType === 'main') {
+    log('Starting as main node...');
+  } else if (keys.nodeType === 'side') {
+    log(`Starting as side node with main address : ${keys.mainAddress}`);
   }
 
-  app.listen(PORT, () => {
-    debug(`Listening on http://${IP_ADDRESS}:${PORT}`);
+  /**
+   * subscribe side node via
+   * POST /blockchain/subscribe  to MAIN node
+   */
+
+  /**
+   * get all blocks via
+   * GET /blockchain/blocks  to MAIN node
+   */
+
+  app.listen({ port: keys.port, host: '0.0.0.0' }, () => {
+    log(`Listening on http://${IP_ADDRESS}:${keys.port}`);
   });
 };
 
-start();
+start().catch((err) => {
+  log(err);
+  process.exit(1);
+});
