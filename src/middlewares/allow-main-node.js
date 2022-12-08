@@ -1,12 +1,18 @@
-const { nodeType } = require('../config/keys');
+const createHttpError = require('http-errors');
+const keys = require('../config/keys');
 
+/**
+ * allowMainNode
+ * =============
+ * - only allow requests from main node
+ */
 const allowMainNode = (req, res, next) => {
-  if (nodeType !== 'main') {
-    return res
-      .status(400)
-      .send('Getting blocks from non-main node is not allowed');
+  // check requester is main or not
+  const { remoteAddress, remotePort } = req.socket;
+  if (keys.mainAddress !== `http://${remoteAddress}:${remotePort}`) {
+    const error = createHttpError(403, 'Only main node is allowed');
+    return next(error);
   }
-
   next();
 };
 

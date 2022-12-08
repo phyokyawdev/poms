@@ -1,33 +1,30 @@
-const log = require("debug")("info:routes/blockchain");
-const express = require("express");
-const { allowMainNode } = require("../middlewares");
+const express = require('express');
+const {
+  allowMainNode,
+  allowSideNode,
+  isThisMain,
+  isThisSide
+} = require('../middlewares');
 const router = express.Router();
 
 /**
- * MAIN NODE WILL HANDLE SUBSCRIPTION
- * REQUESTS FROM SIDE NODES.
+ * MAIN NODE ROUTES
+ * - this node must be running as main
+ * - handle getAllBlocks requests from side nodes
  */
-router.post("/subscribe", allowMainNode, async (req, res) => {
-  const { remoteAddress, remotePort } = req.socket;
-  log(`new side node at http://${remoteAddress}:${remotePort}`);
-
-  /**
-   * UPON SUBSCRIPTION,
-   * 1. store ip_address of subscriber
-   * networkService.addNode()
-   */
-
-  res.send("subscribed successfully");
+router.get('/blocks', isThisMain, allowSideNode, async (req, res) => {
+  const blocks = { blocks: [] };
+  // create leveldb stream and post to /blocks
+  res.send(blocks);
 });
 
 /**
- * MAIN NODE WILL HANDLE BLOCKS
- * REQUESTS FROM SIDE NODES
+ * SIDE NODE ROUTES
+ * - this node must be running as side
+ * - handle postNewBlock request from main node
  */
-router.get("/blocks", allowMainNode, async (req, res) => {
-  // const blocks = blockchainService.getBlocks();
-  const blocks = { blocks: [] };
-  res.send(blocks);
+router.post('/blocks', isThisSide, allowMainNode, async (req, res) => {
+  res.send('success');
 });
 
 module.exports = router;
