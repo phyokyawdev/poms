@@ -10,7 +10,7 @@
 const crypto = require('crypto');
 const db = require('../db');
 
-const sideNodeDb = db.side_nodes;
+const sideNodeDb = db.nodeStore;
 const algorithm = 'sha256';
 const hashObj = crypto.createHash(algorithm);
 

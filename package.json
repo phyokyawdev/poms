@@ -39,6 +39,7 @@
     "http-errors": "^2.0.0",
     "ip": "^1.1.8",
     "level": "^8.0.0",
+    "merkle-patricia-tree": "^4.2.4",
     "repl": "^0.1.3",
     "yargs": "^17.6.2"
   },

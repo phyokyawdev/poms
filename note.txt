@@ -1,0 +1,15 @@
+sample accounts
+
+main node
+=========
+{
+  privateKey: '0x42149995a69d74dc9cdef715a9e0d2149a25fa3e0841094d61b1783ed1f21cca',
+  address: '0x8727edbea1b1622dee260ce3d05835efe3a3701d'
+}
+
+side node
+=========
+{
+  privateKey: '0x78cafb987e3b90cecadd70af6d8b065d194d9de9ba4b7b39a5ca046019762138',
+  address: '0x237d68165c86db2f394ef7b6a8708ae85a4be3ba'
+}

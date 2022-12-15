@@ -1,3 +1,4 @@
+const log = require('debug')('info:network');
 const express = require('express');
 const createHttpError = require('http-errors');
 const { isThisMain } = require('../middlewares');
@@ -17,7 +18,7 @@ router.post('/subscribe', isThisMain, async (req, res) => {
   try {
     await networkService.addNode(side_node_address);
   } catch (error) {
-    throw createHttpError(500, 'database error: side_nodes');
+    throw createHttpError(500, 'database error: nodeStore');
   }
 
   res.send('subscribed successfully');

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+const { default: axios } = require('axios');
 const log = require('debug')('info:index');
 const ip = require('ip');
-const axios = require('axios');
 const keys = require('./config/keys');
 const app = require('./app');
 
@@ -22,14 +22,14 @@ const IP_ADDRESS = ip.address();
 
 const start = async () => {
   if (keys.nodeType === 'main') {
-    log('Starting as main node...');
-  } else if (keys.nodeType === 'side') {
-    log(`Starting as side node with main node address : ${keys.mainAddress}`);
+    log(`Starting main node with account address : ${keys.mainAccountAddress}`);
+  } else {
+    log(`Starting side node with main node ip address : ${keys.mainIpAddress}`);
 
     /**
      * subscribe to main node
      */
-    const res = await axios.post(`${keys.mainAddress}/network/subscribe`);
+    const res = await axios.post(`${keys.mainIpAddress}/network/subscribe`);
     if (res.status !== 200) throw Error('Subscription to main node failed');
     log(`Successfully subscribed to main node`);
 
@@ -40,8 +40,6 @@ const start = async () => {
     log(`Downloading old blocks...`);
 
     log(`Download completed`);
-  } else {
-    throw Error(`Node type is not defined`);
   }
 
   app.listen({ port: keys.port, host: '0.0.0.0' }, () => {
