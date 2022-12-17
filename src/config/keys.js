@@ -1,3 +1,4 @@
+const util = require('@ethereumjs/util');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const argv = yargs(hideBin(process.argv)).argv;
@@ -5,7 +6,7 @@ const argv = yargs(hideBin(process.argv)).argv;
 /**
  * CHECK CLIENT OPTIONS
  */
-const { port = 3000, nodeType, mainIpAddress, mainAccountAddress } = argv;
+let { port = 3000, nodeType, mainIpAddress, mainAccountAddress } = argv;
 
 if (!nodeType) throw new Error('--nodeType is required');
 
@@ -19,6 +20,9 @@ if (lower_type === 'main' && !mainAccountAddress)
 
 if (lower_type === 'side' && !mainIpAddress)
   throw new Error('--mainIpAddress is required for --nodeType side');
+
+//strip hex prefix for mainAccountAddress
+mainAccountAddress = util.stripHexPrefix(mainAccountAddress);
 
 module.exports = {
   port,

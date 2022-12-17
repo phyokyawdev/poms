@@ -1,12 +1,11 @@
 const util = require('@ethereumjs/util');
-const { mainAccountAddress } = require('../config/keys');
-const { enrollManufacturer, checkAuthorShip } = require('./manufacturer');
+const { enrollManufacturer } = require('./manufacturer');
 const { enrollProduct, shipProduct, receiveProduct } = require('./product');
 
 /**
  * Retrieve sender address from tx
  * @param {*} tx transaction
- * @returns sender address
+ * @returns sender address - no hex prefix
  */
 const getSenderAddress = (tx) => {
   const { txParams, ecdsaSignature } = tx;
@@ -49,42 +48,27 @@ const isValidTransaction = (tx) => {
 const executeTransaction = async (tx) => {
   const { txParams } = tx;
 
-  // get senderAddress
   const senderAddress = getSenderAddress(tx);
-
-  // get params from txParams
   const { methodName, payloads = [] } = txParams;
 
   let transactionResult;
-  // switch methodName according to txParams;
+
   switch (methodName) {
     case 'enrollManufacturer':
-      if (senderAddress === mainAccountAddress) {
-        transactionResult = await enrollManufacturer(...payloads);
-      }
+      transactionResult = await enrollManufacturer(senderAddress, ...payloads);
       break;
 
-    // case 'checkAuthorShip':
-    //   transactionResult = checkAuthorShip(...payloads);
-    //   break;
-
     case 'enrollProduct':
-      const isAuthor = await checkAuthorShip(...payloads);
-      if (isAuthor) {
-        transactionResult = await enrollProduct(...payloads);
-      }
+      transactionResult = await enrollProduct(senderAddress, ...payloads);
       break;
 
     case 'shipProduct':
-      transactionResult = await shipProduct(...payloads);
+      transactionResult = await shipProduct(senderAddress, ...payloads);
       break;
 
     case 'receiveProduct':
-      transactionResult = await receiveProduct(...payloads);
+      transactionResult = await receiveProduct(senderAddress, ...payloads);
       break;
-
-    // case 'getCurrentOwner':
-    //   break;
 
     default:
       throw new Error('Method name not exist');

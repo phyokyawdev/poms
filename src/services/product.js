@@ -1,30 +1,31 @@
+const log = require('debug')('info:product service');
 const { productTrie } = require('../db');
-/*
- * PRODUCT
- * - enroll product
- * - ship and receive product
- * - get current owner
- * - get recipient
- * - get product status
- * - strip hex prefix inside here
- */
+const { checkAuthorShip } = require('./manufacturer');
 
 /**
  * Enroll product to state
- * @param {*} manufacturerAddress message sender's address
+ * - only valid manufacturer is allowed
+ * @param {*} senderAddress message sender's address (manufacturer)
  * @param {*} productCode product code to be enrolled
  */
-const enrollProduct = async (manufacturerAddress, productCode) => {
+const enrollProduct = async (senderAddress, productCode) => {
+  // isValidManufacturer?
+  const isValidManufacturer = await checkAuthorShip(senderAddress, productCode);
+  if (!isValidManufacturer) return;
+
   const productInfo = {
-    owner: manufacturerAddress,
+    owner: senderAddress,
     status: 'owned'
   };
 
   await productTrie.put(productCode, productInfo);
+
+  log(`enrolled product, trie root: ${productTrie.root}`);
 };
 
 /**
  * Called when product is just left from current owner
+ * - only owner is allowed
  * @param {*} senderAddress message sender's address
  * @param {*} recipientAccountAddress product receiver's address
  * @param {*} productCode product code to be shipped
@@ -35,39 +36,44 @@ const shipProduct = async (
   productCode
 ) => {
   const productInfo = await productTrie.get(productCode);
+  if (!productInfo) throw new Error('product not exist');
+
   const { owner, status } = productInfo;
 
+  // isOwner?
   if (status === 'owned' && owner === senderAddress) {
     productInfo.recipient = recipientAccountAddress;
     productInfo.status = 'shipped';
 
     await productTrie.put(productCode, productInfo);
+    log(`shipped product, trie root: ${productTrie.root}`);
   }
 };
 
 /**
  * Invoked by new owner who received a product
+ * - only recipient is allowed
  * @param {*} senderAddress message sender's address
  * @param {*} productCode product code to be received
  */
 const receiveProduct = async (senderAddress, productCode) => {
   const productInfo = await productTrie.get(productCode);
-  if (productInfo.recipient === senderAddress) {
+  if (!productInfo) throw new Error('product not exist');
+
+  const { recipient, status } = productInfo;
+
+  // isRecipient?
+  if (status === 'shipped' && recipient === senderAddress) {
     productInfo.owner = senderAddress;
     productInfo.status = 'owned';
 
     await productTrie.put(productCode, productInfo);
+    log(`received product, trie root: ${productTrie.root}`);
   }
-};
-
-const getCurrentOwner = async (productCode) => {
-  const productInfo = await productTrie.get(productCode);
-  return productInfo.owner;
 };
 
 module.exports = {
   enrollProduct,
   shipProduct,
-  receiveProduct,
-  getCurrentOwner
+  receiveProduct
 };
