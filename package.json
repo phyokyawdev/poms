@@ -4,7 +4,7 @@
   "description": "blockchain based product ownership management system",
   "main": "src/index.js",
   "scripts": {
-    "main": "node -r dotenv/config src/index.js --nodeType=main",
+    "main": "node -r dotenv/config src/index.js -t main -a 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
     "side": "node -r dotenv/config src/index.js --nodeType=side",
     "wallet": "node wallet/index.js"
   },
@@ -31,6 +31,7 @@
     "@ethereumjs/tx": "^4.0.1",
     "@ethereumjs/util": "^8.0.2",
     "axios": "^1.2.1",
+    "commander": "^9.4.1",
     "debug": "^4.3.4",
     "ethereumjs-util": "^7.1.5",
     "ethereumjs-wallet": "^1.0.2",
@@ -40,8 +41,8 @@
     "ip": "^1.1.8",
     "level": "^8.0.0",
     "merkle-patricia-tree": "^4.2.4",
-    "repl": "^0.1.3",
-    "yargs": "^17.6.2"
+    "morgan": "^1.10.0",
+    "repl": "^0.1.3"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",
