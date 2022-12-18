@@ -8,6 +8,8 @@ const create = (store) => {
   trie.put = function () {
     let transformedKey = arguments[0];
     let transformedVal = arguments[1];
+    if (!transformedKey || !transformedVal)
+      throw new Error('Falsy values are not allowed for key and value');
 
     if (!Buffer.isBuffer(transformedKey)) {
       const parsedKey = JSON.stringify(transformedKey);
@@ -32,7 +34,7 @@ const create = (store) => {
 
     return tempGet
       .apply(this, arguments)
-      .then((res) => JSON.parse(res.toString()));
+      .then((res) => res && JSON.parse(res.toString()));
   };
 
   return trie;

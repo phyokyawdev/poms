@@ -11,8 +11,14 @@ const test = async () => {
 
   const one = await accountTrie.get('one');
   const two = await accountTrie.get('two');
-  console.log('result: ', one);
-  console.log('result: ', two);
+
+  //const errorKeyPut = await accountTrie.put(null, 'true val');
+  //const errorValuePut = await accountTrie.put('trueKey', undefined);
+  const errorRetrieve = await accountTrie.get('three');
+
+  console.log('result one: ', one);
+  console.log('result two: ', two);
+  console.log('errorRetrieve: ', errorRetrieve);
   console.log('root: ', accountTrie.root.toString('hex'));
 };
 
