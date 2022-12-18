@@ -1,5 +1,6 @@
 const express = require('express');
 require('express-async-errors');
+const morgan = require('morgan');
 const createHttpError = require('http-errors');
 const blockchainRouter = require('./routes/blockchain');
 const transactionRouter = require('./routes/transactions');
@@ -7,6 +8,9 @@ const networkRouter = require('./routes/network');
 const { handleError } = require('./middlewares');
 
 const app = express();
+
+// log request
+app.use(morgan('dev'));
 
 // parse request
 app.use(express.json());
