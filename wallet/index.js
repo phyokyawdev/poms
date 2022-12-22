@@ -5,7 +5,7 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const repl = require('repl');
+const repl = require('node:repl');
 const cli = repl.start({ replMode: repl.REPL_MODE_STRICT });
 const account = require('./account');
 const transaction = require('./transaction');

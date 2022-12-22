@@ -41,8 +41,7 @@
     "ip": "^1.1.8",
     "level": "^8.0.0",
     "merkle-patricia-tree": "^4.2.4",
-    "morgan": "^1.10.0",
-    "repl": "^0.1.3"
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",

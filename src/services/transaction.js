@@ -3,26 +3,6 @@ const { enrollManufacturer } = require('./manufacturer');
 const { enrollProduct, shipProduct, receiveProduct } = require('./product');
 
 /**
- * Verify if signature of transaction is valid.
- * @param tx transaction
- * @param tx.txParams tx param object:
- * @param tx.ecdsaSignature tx signature object: { v, r, s }
- */
-const isValidTransaction = (tx) => {
-  const { ecdsaSignature } = tx;
-  if (!ecdsaSignature) return false;
-
-  const { v, r, s } = ecdsaSignature;
-  if (!v || !r || !s) return false;
-
-  try {
-    return util.isValidSignature(v, r, s);
-  } catch (error) {
-    return false;
-  }
-};
-
-/**
  * Execute account, manufacturer and product methods
  * according to txParams object.
  * @param tx transaction
@@ -61,7 +41,7 @@ const executeTransaction = async (tx) => {
   return transactionResult;
 };
 
-module.exports = { isValidTransaction, executeTransaction };
+module.exports = { executeTransaction };
 
 /**
  * Retrieve sender address from tx
