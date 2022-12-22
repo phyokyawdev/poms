@@ -3,28 +3,6 @@ const { enrollManufacturer } = require('./manufacturer');
 const { enrollProduct, shipProduct, receiveProduct } = require('./product');
 
 /**
- * Retrieve sender address from tx
- * @param {*} tx transaction
- * @returns sender address - no hex prefix
- */
-const getSenderAddress = (tx) => {
-  const { txParams, ecdsaSignature } = tx;
-
-  // creat msgHash
-  const jsonTxParam = JSON.stringify(txParams);
-  const msgHash = util.hashPersonalMessage(Buffer.from(jsonTxParam));
-
-  // get v,s,r, from sig
-  const { v, r, s } = ecdsaSignature;
-
-  // recover public key and sender address
-  const recoveredPublicKey = util.ecrecover(msgHash, v, r, s);
-  const senderAddress = util.publicToAddress(recoveredPublicKey);
-
-  return senderAddress;
-};
-
-/**
  * Verify if signature of transaction is valid.
  * @param tx transaction
  * @param tx.txParams tx param object:
@@ -35,7 +13,14 @@ const isValidTransaction = (tx) => {
   if (!ecdsaSignature) return false;
 
   const { v, r, s } = ecdsaSignature;
-  return util.isValidSignature(v, r, s);
+  if (!v || !r || !s) return false;
+
+  try {
+    return util.isValidSignature(v, r, s);
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };
 
 /**
@@ -49,7 +34,7 @@ const executeTransaction = async (tx) => {
   const { txParams } = tx;
 
   const senderAddress = getSenderAddress(tx);
-  const { methodName, payloads = [] } = txParams;
+  const { methodName, payloads } = txParams;
 
   let transactionResult;
 
@@ -78,3 +63,25 @@ const executeTransaction = async (tx) => {
 };
 
 module.exports = { isValidTransaction, executeTransaction };
+
+/**
+ * Retrieve sender address from tx
+ * @param {*} tx transaction
+ * @returns sender address - no hex prefix
+ */
+function getSenderAddress(tx) {
+  const { txParams, ecdsaSignature } = tx;
+
+  // creat msgHash
+  const jsonTxParam = JSON.stringify(txParams);
+  const msgHash = util.hashPersonalMessage(Buffer.from(jsonTxParam));
+
+  // get v,s,r, from sig
+  let { v, r, s } = ecdsaSignature;
+
+  // recover public key and sender address
+  const recoveredPublicKey = util.ecrecover(msgHash, v, r, s);
+  const senderAddress = util.publicToAddress(recoveredPublicKey);
+
+  return senderAddress.toString('hex');
+}

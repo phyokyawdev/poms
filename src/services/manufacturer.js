@@ -2,13 +2,6 @@ const log = require('debug')('info:manufacturer service');
 const { manufacturerTrie } = require('../db');
 const { mainAccountAddress } = require('../config/keys');
 
-/*
- * MANUFACTURER
- * - enroll manufacturer
- * - check authorship
- * - strip hex prefix inside here
- */
-
 let currentRoot = '';
 
 /**
@@ -26,7 +19,11 @@ const enrollManufacturer = async (
   companyName
 ) => {
   // isAdmin?
-  if (senderAddress !== mainAccountAddress) return;
+  if (senderAddress !== mainAccountAddress) {
+    console.log('sender: ', senderAddress);
+    console.log('main: ', mainAccountAddress);
+    throw new Error('only admin can enroll manufacturer');
+  }
 
   // address => manufacturerInfo
   const manufacturerInfo = { companyPrefix, companyName };
@@ -36,6 +33,8 @@ const enrollManufacturer = async (
   await manufacturerTrie.put(companyPrefix, manufacturerAddress);
 
   log(`manufacturer trie root changed: ${manufacturerTrie.root}`);
+
+  return { manufacturerAddress, companyPrefix, companyName };
 };
 
 /**
@@ -45,6 +44,7 @@ const enrollManufacturer = async (
  * @returns boolean
  */
 const checkAuthorShip = async (senderAddress, productCode) => {
+  if (!productCode) return false;
   const manufacturerAddress = await getManufacturerAddress(productCode);
   if (manufacturerAddress === senderAddress) return true;
   return false;
@@ -68,5 +68,6 @@ async function getManufacturerAddress(productCode) {
  * @returns
  */
 function getCompanyPrefix(productCode) {
-  return false;
+  const firstSix = String(productCode).slice(0, 6);
+  return Number(firstSix);
 }

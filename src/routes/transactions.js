@@ -1,9 +1,10 @@
+const log = require('debug')('info:transaction route');
 const { default: axios } = require('axios');
 const express = require('express');
 const createHttpError = require('http-errors');
 const router = express.Router();
 const { nodeType, mainIpAddress } = require('../config/keys');
-const { allowValidTransaction } = require('../middlewares');
+const { allowValidTransaction, parseTransaction } = require('../middlewares');
 const { executeTransaction } = require('../services/transaction');
 
 /**
@@ -11,8 +12,8 @@ const { executeTransaction } = require('../services/transaction');
  * SIGNED WITH PRIVATE KEY.
  * - allowValidTransaction
  */
-router.post('/', allowValidTransaction, async (req, res) => {
-  const tx = req.body;
+router.post('/', parseTransaction, allowValidTransaction, async (req, res) => {
+  const { tx } = req.body;
 
   // side node will delegate tx to main node
   if (nodeType === 'side') {
@@ -28,6 +29,7 @@ router.post('/', allowValidTransaction, async (req, res) => {
   try {
     transactionResult = await executeTransaction(tx);
   } catch (error) {
+    log(error);
     throw createHttpError(400, error.message);
   }
 

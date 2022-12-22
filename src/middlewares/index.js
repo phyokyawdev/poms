@@ -4,6 +4,7 @@ const allowSideNode = require('./allow-side-node');
 const isThisMain = require('./is-this-main');
 const isThisSide = require('./is-this-side');
 const allowValidTransaction = require('./allow-valid-transaction');
+const parseTransaction = require('./parse-transaction');
 
 module.exports = {
   handleError,
@@ -11,5 +12,6 @@ module.exports = {
   allowSideNode,
   isThisMain,
   isThisSide,
-  allowValidTransaction
+  allowValidTransaction,
+  parseTransaction
 };

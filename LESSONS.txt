@@ -1,0 +1,17 @@
+DATA TYPES AT DIFFERENT LAYERS
+- debuggin at route and service layer need human readable format
+- external lib use buffer format
+- network request need extra parsing
+- BigInt was handled differently via wallet and node
+soln by 
+- buffer at db layer and hex at other layers
+- adapter pattern with hex for external libs
+
+JAVASCRIPT PROXIES
+- using apply trap for target functions causing problems with 
+  methods that use internal context of target
+- using both get and apply trap is causing problems
+soln by
+- apply trap is binded with this of proxy object itself
+- use get and rebind this to target object for functions,
+  so, methods that use internal context would functions correctly
