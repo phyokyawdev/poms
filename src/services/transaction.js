@@ -18,7 +18,6 @@ const isValidTransaction = (tx) => {
   try {
     return util.isValidSignature(v, r, s);
   } catch (error) {
-    console.log(error);
     return false;
   }
 };

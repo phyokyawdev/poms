@@ -19,14 +19,11 @@ const enrollManufacturer = async (
   companyName
 ) => {
   // isAdmin?
-  if (senderAddress !== mainAccountAddress) {
-    console.log('sender: ', senderAddress);
-    console.log('main: ', mainAccountAddress);
+  if (senderAddress !== mainAccountAddress)
     throw new Error('only admin can enroll manufacturer');
-  }
 
   // address => manufacturerInfo
-  const manufacturerInfo = { companyPrefix, companyName };
+  const manufacturerInfo = { manufacturerAddress, companyPrefix, companyName };
   await manufacturerTrie.put(manufacturerAddress, manufacturerInfo);
 
   // uint40 => address
@@ -34,7 +31,7 @@ const enrollManufacturer = async (
 
   log(`manufacturer trie root changed: ${manufacturerTrie.root}`);
 
-  return { manufacturerAddress, companyPrefix, companyName };
+  return manufacturerInfo;
 };
 
 /**
@@ -69,5 +66,5 @@ async function getManufacturerAddress(productCode) {
  */
 function getCompanyPrefix(productCode) {
   const firstSix = String(productCode).slice(0, 6);
-  return Number(firstSix);
+  return firstSix;
 }

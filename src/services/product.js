@@ -11,9 +11,10 @@ const { checkAuthorShip } = require('./manufacturer');
 const enrollProduct = async (senderAddress, productCode) => {
   // isValidManufacturer?
   const isValidManufacturer = await checkAuthorShip(senderAddress, productCode);
-  if (!isValidManufacturer) return;
+  if (!isValidManufacturer) throw new Error('Invalid manufacturer');
 
   const productInfo = {
+    productCode,
     owner: senderAddress,
     status: 'owned'
   };
@@ -21,6 +22,8 @@ const enrollProduct = async (senderAddress, productCode) => {
   await productTrie.put(productCode, productInfo);
 
   log(`enrolled product, trie root: ${productTrie.root}`);
+
+  return productInfo;
 };
 
 /**
@@ -48,6 +51,8 @@ const shipProduct = async (
     await productTrie.put(productCode, productInfo);
     log(`shipped product, trie root: ${productTrie.root}`);
   }
+
+  return productInfo;
 };
 
 /**
@@ -70,6 +75,8 @@ const receiveProduct = async (senderAddress, productCode) => {
     await productTrie.put(productCode, productInfo);
     log(`received product, trie root: ${productTrie.root}`);
   }
+
+  return productInfo;
 };
 
 module.exports = {
