@@ -10,7 +10,7 @@ const post = async (nodeIpAddress, tx) => {
     return res.data;
   } catch (error) {
     console.log(error);
-    return res.data;
+    return error.response.data.error;
   }
 };
 

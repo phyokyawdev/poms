@@ -7,9 +7,30 @@ main node
   address: '0x8727edbea1b1622dee260ce3d05835efe3a3701d'
 }
 
-side node
-=========
+manufacturer
+============
 {
   privateKey: '0x78cafb987e3b90cecadd70af6d8b065d194d9de9ba4b7b39a5ca046019762138',
   address: '0x237d68165c86db2f394ef7b6a8708ae85a4be3ba'
+}
+
+user one 
+========
+{
+  privateKey: '0x14fdeaa1a09aaa91349f6b8d8e24a6316b2870dca52babf86060a8b69d1b0bf2',
+  address: '0x2eb36426bb9a5b4ba8c2b620d0402999549d6b2c'
+}
+
+user two
+========
+{
+  privateKey: '0x4f407984f742eca3f6e0a97d24bd8a7f02216b9b1616d3ca8a03459de4adc730',
+  address: '0x2c623c2965c2800cfc220899d16227487dff5841'
+}
+
+user three
+==========
+{
+  privateKey: '0x796c742a6b066faee23a2350a16ae489a4c130e2df78857de3b6860fb818acc2',
+  address: '0x5f1e950b8a389788ddf2a60b31841bd87f64d00b'
 }
