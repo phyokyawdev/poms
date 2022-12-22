@@ -1,5 +1,5 @@
 const util = require('@ethereumjs/util');
-const { enrollManufacturer } = require('./manufacturer');
+const { enrollManufacturer, checkAuthorShip } = require('./manufacturer');
 const { enrollProduct, shipProduct, receiveProduct } = require('./product');
 
 /**
@@ -23,6 +23,11 @@ const executeTransaction = async (tx) => {
       break;
 
     case 'enrollProduct':
+      const isValidManufacturer = await checkAuthorShip(
+        senderAddress,
+        ...payloads
+      );
+      if (!isValidManufacturer) throw new Error('Invalid manufacturer');
       transactionResult = await enrollProduct(senderAddress, ...payloads);
       break;
 
