@@ -21,7 +21,7 @@ const enrollProduct = async (senderAddress, productCode) => {
 
   await productTrie.put(productCode, productInfo);
 
-  log(`enrolled product, trie root: ${productTrie.root}`);
+  log(`enrolled product, product trie root: ${productTrie.root}`);
 
   return productInfo;
 };
@@ -49,7 +49,7 @@ const shipProduct = async (
     productInfo.status = 'shipped';
 
     await productTrie.put(productCode, productInfo);
-    log(`shipped product, trie root: ${productTrie.root}`);
+    log(`shipped product, product trie root: ${productTrie.root}`);
   }
 
   return productInfo;
@@ -73,7 +73,7 @@ const receiveProduct = async (senderAddress, productCode) => {
     productInfo.status = 'owned';
 
     await productTrie.put(productCode, productInfo);
-    log(`received product, trie root: ${productTrie.root}`);
+    log(`received product, product trie root: ${productTrie.root}`);
   }
 
   return productInfo;

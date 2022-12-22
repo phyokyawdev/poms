@@ -29,7 +29,9 @@ const enrollManufacturer = async (
   // uint40 => address
   await manufacturerTrie.put(companyPrefix, manufacturerAddress);
 
-  log(`manufacturer trie root changed: ${manufacturerTrie.root}`);
+  log(
+    `enrolled manufacturer, manufacturer trie root: ${manufacturerTrie.root}`
+  );
 
   return manufacturerInfo;
 };
