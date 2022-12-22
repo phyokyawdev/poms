@@ -2,10 +2,12 @@ const log = require('debug')('info:transaction route');
 const { default: axios } = require('axios');
 const express = require('express');
 const createHttpError = require('http-errors');
-const router = express.Router();
+const util = require('@ethereumjs/util');
 const { nodeType, mainIpAddress } = require('../config/keys');
 const { allowValidTransaction, parseTransaction } = require('../middlewares');
 const { executeTransaction } = require('../services/transaction');
+
+const router = express.Router();
 
 /**
  * CLIENT WILL CREATE NEW TRANSACTIONS
@@ -41,7 +43,27 @@ router.post('/', parseTransaction, allowValidTransaction, async (req, res) => {
 
   // broadcast to network
 
-  return res.status(200).send(transactionResult);
+  const parsedTransactionResult = parseTransactionResult(transactionResult);
+  return res.status(200).send(parsedTransactionResult);
 });
 
 module.exports = router;
+
+/**
+ * Parse transactionResult
+ * - if address string present -> add hex prefix 0x
+ * @param {*} transactionResult
+ * @returns transaction result with parsed addresses
+ */
+function parseTransactionResult(transactionResult) {
+  const parsedTransactionResult = {};
+
+  for (const key in transactionResult) {
+    const val = transactionResult[key];
+    if (util.isValidAddress(util.addHexPrefix(val)))
+      parsedTransactionResult[key] = util.addHexPrefix(val);
+    else parsedTransactionResult[key] = val;
+  }
+
+  return parsedTransactionResult;
+}
