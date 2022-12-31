@@ -5,6 +5,7 @@ const createHttpError = require('http-errors');
 const blockchainRouter = require('./routes/blockchain');
 const transactionRouter = require('./routes/transactions');
 const networkRouter = require('./routes/network');
+const informationRouter = require('./routes/information');
 const { handleError } = require('./middlewares');
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/network', networkRouter);
 app.use('/blockchain', blockchainRouter);
 app.use('/transactions', transactionRouter);
+app.use('/information', informationRouter);
 
 // unknown routes handler
 app.all('*', async (req, res, next) => {
