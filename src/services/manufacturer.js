@@ -22,6 +22,10 @@ const enrollManufacturer = async (
   if (senderAddress !== mainAccountAddress)
     throw new Error('only admin can enroll manufacturer');
 
+  // is manufacturer already exist
+  const existingManufacturer = await manufacturerTrie.get(manufacturerAddress);
+  if (existingManufacturer) throw new Error('existing manufacturer');
+
   // address => manufacturerInfo
   const manufacturerInfo = { manufacturerAddress, companyPrefix, companyName };
   await manufacturerTrie.put(manufacturerAddress, manufacturerInfo);
