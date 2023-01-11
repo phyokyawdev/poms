@@ -1,41 +1,65 @@
 const log = require('debug')('info:parseTransaction middleware');
 const util = require('@ethereumjs/util');
+const createHttpError = require('http-errors');
 
 /**
- * Parse transaction data if present
- * tx.txParams.payloads - strip 0x prefix from hex string
- * tx.ecdsaSignature (v, r, s) - parse to buffer and bigint
+ * parse valid transaction data to req.tx or terminate request
+ * @param {*} req req.body is transaction data
+ * @param {*} res
+ * @param {*} next
  */
 const parseTransaction = (req, res, next) => {
-  const { tx } = req.body;
-  if (!tx) return next();
+  /**
+   * VALIDATE TRANSACTION DATA
+   * - check req.body
+   * - check txParams
+   * - check ecdsaSignature
+   */
+  const tx = req.body;
+  if (!tx) throw createHttpError(400, 'Transaction data not present');
 
   const { txParams, ecdsaSignature } = tx;
 
-  // parse txParams.payloads
-  if (txParams && txParams.payloads) {
-    tx.txParams.payloads = txParams.payloads.map((element) => {
-      if (util.isHexString(element)) return util.stripHexPrefix(element);
-      return element;
-    });
+  if (!(txParams && txParams.methodName && txParams.payloads))
+    throw createHttpError(400, 'txParams is missing some keys');
+
+  if (
+    !(
+      ecdsaSignature &&
+      ecdsaSignature.v &&
+      ecdsaSignature.r &&
+      ecdsaSignature.s
+    )
+  )
+    throw createHttpError(400, 'ecdsaSignature is missing some keys');
+
+  /**
+   * PARSE & VALIDATE ECDSASIGNATURE
+   * - v -> BigInt
+   * - r -> Buffer
+   * - s -> Buffer
+   */
+  let { v, r, s } = ecdsaSignature;
+  try {
+    v = BigInt(v);
+    r = Buffer.from(r);
+    s = Buffer.from(s);
+  } catch (error) {
+    log(error);
+    throw createHttpError(400, 'Error parsing signature');
   }
 
-  // parse ecdsaSignature
-  if (ecdsaSignature) {
-    try {
-      let { v, r, s } = ecdsaSignature;
-      if (r) r = Buffer.from(r);
-      if (s) s = Buffer.from(s);
-      if (v) v = BigInt(v);
-      tx.ecdsaSignature = { v, r, s };
-    } catch (error) {
-      // if error happen, do nothing
-      log(error);
-    }
-  }
+  if (!util.isValidSignature(v, r, s))
+    throw createHttpError(400, 'Invalid signature');
 
-  // replace tx with parsedTx
-  req.body.tx = tx;
+  /**
+   * ADD VALID tx TO req
+   * - req.tx
+   * - call next route handler
+   */
+  tx.ecdsaSignature = { v, r, s };
+  req.tx = tx;
+
   next();
 };
 

@@ -1,16 +1,14 @@
-const axios = require('axios');
+const { default: axios } = require('axios');
 
 const post = async (nodeIpAddress, tx) => {
   let res;
   try {
-    res = await axios.post(`${nodeIpAddress}/transactions`, {
-      tx
-    });
+    res = await axios.post(`${nodeIpAddress}/transactions`, tx);
 
     return res.data;
   } catch (error) {
-    console.log(error);
-    return error.response.data.error;
+    //console.log(error);
+    return error.response.data;
   }
 };
 

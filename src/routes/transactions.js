@@ -15,7 +15,7 @@ const router = express.Router();
  * - allowValidTransaction
  */
 router.post('/', parseTransaction, allowValidTransaction, async (req, res) => {
-  const { tx } = req.body;
+  const tx = req.tx;
 
   // side node will delegate tx to main node
   if (nodeType === 'side') {
