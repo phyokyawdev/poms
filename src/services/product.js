@@ -74,6 +74,7 @@ const receiveProduct = async (senderAddress, productCode) => {
 
   productInfo.owner = senderAddress;
   productInfo.status = 'owned';
+  delete productInfo.recipient;
 
   await productTrie.put(productCode, productInfo);
   log(`received product, product trie root: ${productTrie.root}`);
