@@ -1,10 +1,15 @@
 const express = require('express');
+const createHttpError = require('http-errors');
+const { productTrie, manufacturerTrie } = require('../db');
 const {
   allowMainNode,
   allowSideNode,
   isThisMain,
-  isThisSide
+  isThisSide,
+  parseRequestBlock
 } = require('../middlewares');
+const { addNewBlock } = require('../services/blockchain');
+const { executeTransaction } = require('../services/transaction');
 const router = express.Router();
 
 /**
@@ -23,8 +28,34 @@ router.get('/blocks', isThisMain, allowSideNode, async (req, res) => {
  * - this node must be running as side
  * - handle postNewBlock request from main node
  */
-router.post('/blocks', isThisSide, allowMainNode, async (req, res) => {
-  res.send('success');
-});
+router.post(
+  '/blocks',
+  isThisSide,
+  allowMainNode,
+  parseRequestBlock,
+  async (req, res) => {
+    const block = req.block;
+
+    // cache old state
+    const productTrieRoot = productTrie.root;
+    const manufacturerTrieRoot = manufacturerTrie.root;
+
+    try {
+      // update state via executing tx
+      await executeTransaction(block.tx);
+
+      // add block to blockchain
+      await addNewBlock(block);
+    } catch (error) {
+      // on error, roll back
+      productTrie.root = productTrieRoot;
+      manufacturerTrie.root = manufacturerTrieRoot;
+
+      throw createHttpError(400, error.message);
+    }
+
+    res.send('success');
+  }
+);
 
 module.exports = router;

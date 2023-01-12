@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
+/**
+ * Monkey patch BigInt
+ */
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
 const { default: axios } = require('axios');
 const log = require('debug')('info:index');
 const ip = require('ip');

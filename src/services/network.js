@@ -8,24 +8,31 @@
 // if empty, retrieve from leveldb (consider restart)
 // upon new record, add to both memory and to leveldb
 const crypto = require('crypto');
-const db = require('../db');
+const { nodeStore } = require('../db');
 
-const sideNodeDb = db.nodeStore;
 const algorithm = 'sha256';
 const hashObj = crypto.createHash(algorithm);
 
-const addNode = async (value) => {
+const addNetworkNode = async (value) => {
   const key = hashObj.update(value).digest();
-  await sideNodeDb.put(key, value);
+  await nodeStore.put(key, value);
 };
 
-const getNode = async (value) => {
+const getNetworkNode = async (value) => {
   const key = hashObj.update(value).digest();
-  const val = await sideNodeDb.get(key);
+  const val = await nodeStore.get(key);
   return val;
 };
 
+// level-read-stream
+// KeyStream
+const publishBlock = async () => {
+  // get value stream
+  // post to blockchain route
+  // ignore failed request (remove them?)
+};
+
 module.exports = {
-  addNode,
-  getNode
+  addNetworkNode,
+  getNetworkNode
 };

@@ -15,3 +15,21 @@ soln by
 - apply trap is binded with this of proxy object itself
 - use get and rebind this to target object for functions,
   so, methods that use internal context would functions correctly
+
+toJSON/toString METHOD 
+- should utilize toJSON() method to add hex prefix inside req and res
+- should utilize toString() method to add hex prefix inside console
+
+ABSTRACTION
+- modify toString() or toJSON() to parse with hex prefix
+- need more work on data type representation in different level
+- transaction (public, need hex prefix)
+- merkle roots (private to nodes, no need hex prefix)
+- blockchain (private to nodes, so no need of hex prefix)
+  - block (private, no need hex prefix)
+
+LEVEL DB 
+- not support structured values, or partially updating a value
+
+NETWORK NODE STORE 
+- should store list of nodes with flat file or json?

@@ -46,7 +46,43 @@ const executeTransaction = async (tx) => {
   return transactionResult;
 };
 
-module.exports = { executeTransaction };
+/**
+ * parse tx data or throw error
+ * @param {*} tx
+ * @returns parsed tx
+ */
+const parseTransaction = (tx) => {
+  const { txParams, ecdsaSignature } = tx;
+
+  if (!(txParams && txParams.methodName && txParams.payloads))
+    throw new Error('txParams is missing some keys');
+
+  if (
+    !(
+      ecdsaSignature &&
+      ecdsaSignature.v &&
+      ecdsaSignature.r &&
+      ecdsaSignature.s
+    )
+  )
+    throw new Error('ecdsaSignature is missing some keys');
+
+  let { v, r, s } = ecdsaSignature;
+  try {
+    v = BigInt(v);
+    r = Buffer.from(r);
+    s = Buffer.from(s);
+  } catch (error) {
+    throw new Error('Error parsing signature');
+  }
+
+  if (!util.isValidSignature(v, r, s)) throw new Error('Invalid signature');
+
+  tx.ecdsaSignature = { v, r, s };
+  return tx;
+};
+
+module.exports = { executeTransaction, parseTransaction };
 
 /**
  * Retrieve sender address from tx

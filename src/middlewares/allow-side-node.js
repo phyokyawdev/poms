@@ -1,17 +1,17 @@
 const createHttpError = require('http-errors');
-const networkService = require('../services/network');
+const { getNetworkNode } = require('../services/network');
 
 /**
  * allowSideNode
  * =============
  * - only allow requests from registered side nodes
  */
-const allowMainNode = async (req, res, next) => {
+const allowSideNode = async (req, res, next) => {
   // check requester is registered side node or not
   const { remoteAddress, remotePort } = req.socket;
   const side_node_address = `http://${remoteAddress}:${remotePort}`;
 
-  const subscribed_node = await networkService.getNode(side_node_address);
+  const subscribed_node = await getNetworkNode(side_node_address);
 
   if (!subscribed_node) {
     const error = createHttpError(403, 'Only registed side node is allowed');
@@ -20,4 +20,4 @@ const allowMainNode = async (req, res, next) => {
   next();
 };
 
-module.exports = allowMainNode;
+module.exports = allowSideNode;

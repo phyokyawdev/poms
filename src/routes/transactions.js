@@ -4,18 +4,22 @@ const express = require('express');
 const createHttpError = require('http-errors');
 const util = require('@ethereumjs/util');
 const { nodeType, mainIpAddress } = require('../config/keys');
-const { allowValidTransaction, parseTransaction } = require('../middlewares');
+const { parseRequestTx } = require('../middlewares');
 const { executeTransaction } = require('../services/transaction');
+const { mineNewBlock } = require('../services/blockchain');
+const { manufacturerTrie, productTrie } = require('../db');
 
 const router = express.Router();
 
 /**
  * CLIENT WILL CREATE NEW TRANSACTIONS
  * SIGNED WITH PRIVATE KEY.
- * - allowValidTransaction
  */
-router.post('/', parseTransaction, allowValidTransaction, async (req, res) => {
+router.post('/', parseRequestTx, async (req, res) => {
   const tx = req.tx;
+
+  const productTrieRoot = productTrie.root;
+  const manufacturerTrieRoot = manufacturerTrie.root;
 
   // side node will delegate tx to main node
   if (nodeType === 'side') {
@@ -31,17 +35,18 @@ router.post('/', parseTransaction, allowValidTransaction, async (req, res) => {
   try {
     transactionResult = await executeTransaction(tx);
   } catch (error) {
+    // on error, roll back
+    productTrie.root = productTrieRoot;
+    manufacturerTrie.root = manufacturerTrieRoot;
+
     log(error);
     throw createHttpError(400, error.message);
   }
 
-  // get the state root (account, manufacturer, product)
+  // blockchain.mineNewBlock with tx and updated state roots
+  const block = await mineNewBlock(tx);
 
-  // mine
-
-  // add block to blockchain
-
-  // broadcast to network
+  // broadcast new block to network
 
   const parsedTransactionResult = parseTransactionResult(transactionResult);
   return res.status(200).send(parsedTransactionResult);

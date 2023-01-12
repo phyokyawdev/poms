@@ -3,7 +3,8 @@ const allowMainNode = require('./allow-main-node');
 const allowSideNode = require('./allow-side-node');
 const isThisMain = require('./is-this-main');
 const isThisSide = require('./is-this-side');
-const parseTransaction = require('./parse-transaction');
+const parseRequestBlock = require('./parse-request-block');
+const parseRequestTx = require('./parse-request-tx');
 
 module.exports = {
   handleError,
@@ -11,5 +12,6 @@ module.exports = {
   allowSideNode,
   isThisMain,
   isThisSide,
-  parseTransaction
+  parseRequestBlock,
+  parseRequestTx
 };
