@@ -12,7 +12,7 @@ const Block = require('./block');
  * Shared properties for BLOCKCHAIN SERVICE
  */
 const DIFFICULTY = 3;
-let currentBlock = new Block();
+let currentBlock;
 
 /**
  * Create new block and add to local blockchain
@@ -39,6 +39,27 @@ const mineNewBlock = async (tx) => {
 
   // update current block
   currentBlock = block;
+
+  return block;
+};
+
+const mineGenesisBlock = async () => {
+  const block = new Block();
+
+  const genesisBlock = block.mine(
+    '',
+    0,
+    productTrie.root,
+    manufacturerTrie.root,
+    {},
+    DIFFICULTY
+  );
+
+  await blockStore.put(block.blockHash, block);
+
+  log(`mined genesis block, block hash: ${genesisBlock.blockHash}`);
+
+  currentBlock = genesisBlock;
 
   return block;
 };
@@ -73,6 +94,7 @@ const addNewBlock = async (block) => {
   if (blockInstance.manufacturerTrieRoot !== manufacturerTrie.root)
     throw new Error('Invalid manufacturer trie root');
 
+  console.log(blockInstance.blockHash);
   // verify block difficulty and structure
   if (!blockInstance.verify(DIFFICULTY)) throw new Error('Invalid block');
 
@@ -83,4 +105,4 @@ const addNewBlock = async (block) => {
   currentBlock = blockInstance;
 };
 
-module.exports = { mineNewBlock, addNewBlock };
+module.exports = { mineGenesisBlock, mineNewBlock, addNewBlock };

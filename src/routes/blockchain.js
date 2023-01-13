@@ -36,6 +36,8 @@ router.post(
   async (req, res) => {
     const block = req.block;
 
+    console.log(`new block received: ${block.blockHash}`);
+
     // cache old state
     const productTrieRoot = productTrie.root;
     const manufacturerTrieRoot = manufacturerTrie.root;

@@ -64,7 +64,17 @@ class Block {
    * @returns boolean
    */
   verify(difficulty) {
-    // pass for genesis block
+    if (!this.validate()) return false;
+
+    if (!this._isSolved(difficulty)) return false;
+
+    const calculatedBlockHash = this._calculateHash();
+    if (this.blockHash !== calculatedBlockHash) return false;
+
+    return true;
+  }
+
+  validate() {
     if (this.height === 0) return true;
 
     if (
@@ -80,11 +90,6 @@ class Block {
       )
     )
       return false;
-
-    if (!this._isSolved(difficulty)) return false;
-
-    const calculatedBlockHash = this._calculateHash();
-    if (this.blockHash !== calculatedBlockHash) return false;
 
     return true;
   }

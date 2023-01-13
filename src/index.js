@@ -12,6 +12,7 @@ const log = require('debug')('info:index');
 const ip = require('ip');
 const keys = require('./config/keys');
 const app = require('./app');
+const { mineGenesisBlock } = require('./services/blockchain');
 
 const IP_ADDRESS = ip.address();
 
@@ -30,13 +31,18 @@ const IP_ADDRESS = ip.address();
 const start = async () => {
   if (keys.nodeType === 'main') {
     log(`Starting main node with account address : ${keys.mainAccountAddress}`);
+
+    // mine genesis block
+    await mineGenesisBlock();
   } else {
     log(`Starting side node with main node ip address : ${keys.mainIpAddress}`);
 
     /**
      * subscribe to main node
      */
-    const res = await axios.post(`${keys.mainIpAddress}/network/subscribe`);
+    const res = await axios.post(`${keys.mainIpAddress}/network/subscribe`, {
+      port: keys.port
+    });
     if (res.status !== 200) throw Error('Subscription to main node failed');
     log(`Successfully subscribed to main node`);
 
@@ -45,6 +51,15 @@ const start = async () => {
      * and add to local blockchain
      */
     log(`Downloading old blocks...`);
+    try {
+      const { data } = await axios.get(
+        `${keys.mainIpAddress}/blockchain/blocks`
+      );
+
+      // blocks
+      // check height -> sort
+      // execute and add to chain one by one
+    } catch (error) {}
 
     log(`Download completed`);
   }

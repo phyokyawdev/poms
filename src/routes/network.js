@@ -11,13 +11,16 @@ const router = express.Router();
  * - handle subscribe request from side node startup
  */
 router.post('/subscribe', isThisMain, async (req, res) => {
-  const { remoteAddress, remotePort } = req.socket;
-  const side_node_address = `http://${remoteAddress}:${remotePort}`;
+  const { port } = req.body;
+
+  const { remoteAddress } = req.socket;
+  const side_node_address = `http://${remoteAddress}:${port}`;
   log(`new side node at ${side_node_address}`);
 
   try {
     await addNetworkNode(side_node_address);
   } catch (error) {
+    console.log(error);
     throw createHttpError(500, 'database error: nodeStore');
   }
 

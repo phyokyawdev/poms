@@ -2,11 +2,11 @@ const log = require('debug')('info:transaction route');
 const { default: axios } = require('axios');
 const express = require('express');
 const createHttpError = require('http-errors');
-const util = require('@ethereumjs/util');
 const { nodeType, mainIpAddress } = require('../config/keys');
 const { parseRequestTx } = require('../middlewares');
 const { executeTransaction } = require('../services/transaction');
 const { mineNewBlock } = require('../services/blockchain');
+const { publishBlock } = require('../services/network');
 const { manufacturerTrie, productTrie } = require('../db');
 
 const router = express.Router();
@@ -34,6 +34,15 @@ router.post('/', parseRequestTx, async (req, res) => {
   let transactionResult;
   try {
     transactionResult = await executeTransaction(tx);
+
+    const block = await mineNewBlock(tx);
+
+    // broadcast new block to network (optimistic)
+    try {
+      await publishBlock(block);
+    } catch (error) {
+      log(error);
+    }
   } catch (error) {
     // on error, roll back
     productTrie.root = productTrieRoot;
@@ -43,32 +52,7 @@ router.post('/', parseRequestTx, async (req, res) => {
     throw createHttpError(400, error.message);
   }
 
-  // blockchain.mineNewBlock with tx and updated state roots
-  const block = await mineNewBlock(tx);
-
-  // broadcast new block to network
-
-  const parsedTransactionResult = parseTransactionResult(transactionResult);
-  return res.status(200).send(parsedTransactionResult);
+  return res.status(200).send(transactionResult);
 });
 
 module.exports = router;
-
-/**
- * Parse transactionResult
- * - if address string present -> add hex prefix 0x
- * @param {*} transactionResult
- * @returns transaction result with parsed addresses
- */
-function parseTransactionResult(transactionResult) {
-  const parsedTransactionResult = {};
-
-  for (const key in transactionResult) {
-    const val = transactionResult[key];
-    if (util.isValidAddress(util.addHexPrefix(val)))
-      parsedTransactionResult[key] = util.addHexPrefix(val);
-    else parsedTransactionResult[key] = val;
-  }
-
-  return parsedTransactionResult;
-}

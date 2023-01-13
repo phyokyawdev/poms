@@ -9,7 +9,7 @@ const keys = require('../config/keys');
 const allowMainNode = (req, res, next) => {
   // check requester is main or not
   const { remoteAddress, remotePort } = req.socket;
-  if (keys.mainIpAddress !== `http://${remoteAddress}:${remotePort}`) {
+  if (keys.mainIpAddress !== `http://${remoteAddress}:3000`) {
     const error = createHttpError(403, 'Only main node is allowed');
     return next(error);
   }

@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "main": "node -r dotenv/config src/index.js -t main -a 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
-    "side": "node -r dotenv/config src/index.js --nodeType=side",
+    "side": "node -r dotenv/config src/index.js -p 3001 -t side -a 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
     "wallet": "node --experimental-repl-await wallet/index.js"
   },
   "bin": {

@@ -13,7 +13,8 @@ const parseRequestBlock = (req, res, next) => {
   if (!blockData) throw new createHttpError(400, 'Block data not present');
 
   const block = new Block(blockData);
-  if (!block.verify()) throw new createHttpError(400, 'Invalid block');
+  if (!block.validate())
+    throw new createHttpError(400, 'Block is missing some properties');
 
   try {
     block.tx = parseTransaction(block.tx);
