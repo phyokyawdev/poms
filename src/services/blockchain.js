@@ -5,12 +5,14 @@
  * - mine(transaction):block  - limited to main node
  */
 const log = require('debug')('info:blockchain service');
-const { blockStore, productTrie, manufacturerTrie } = require('../db');
+const util = require('@ethereumjs/util');
+const { blockStore } = require('../db');
 const Block = require('./block');
 
 /**
  * Shared properties for BLOCKCHAIN SERVICE
  */
+const EMPTY_TRIE_ROOT = util.KECCAK256_RLP_S;
 const DIFFICULTY = 3;
 let currentBlock;
 
@@ -19,21 +21,21 @@ let currentBlock;
  * @param {*} tx parsed transaction
  * @returns new block
  */
-const mineNewBlock = async (tx) => {
+const mineNewBlock = async (tx, productTrieRoot, manufacturerTrieRoot) => {
   let block = new Block();
 
   // mine block
   block = block.mine(
     currentBlock.blockHash,
     currentBlock.height + 1,
-    productTrie.root,
-    manufacturerTrie.root,
+    productTrieRoot,
+    manufacturerTrieRoot,
     tx,
     DIFFICULTY
   );
 
   // add block to local block store
-  await blockStore.put(block.blockHash, block);
+  await blockStore.put(block.height, block);
 
   log(`mined new block, block hash: ${block.blockHash}`);
 
@@ -49,13 +51,13 @@ const mineGenesisBlock = async () => {
   const genesisBlock = block.mine(
     '',
     0,
-    productTrie.root,
-    manufacturerTrie.root,
+    EMPTY_TRIE_ROOT,
+    EMPTY_TRIE_ROOT,
     {},
     DIFFICULTY
   );
 
-  await blockStore.put(block.blockHash, block);
+  await blockStore.put(block.height, block);
 
   log(`mined genesis block, block hash: ${genesisBlock.blockHash}`);
 
@@ -65,7 +67,8 @@ const mineGenesisBlock = async () => {
 };
 
 /**
- * Add new block to local block store
+ * Add new block to blockStore
+ * @param {*} block
  */
 const addNewBlock = async (block) => {
   const blockInstance = new Block(block);
@@ -73,36 +76,64 @@ const addNewBlock = async (block) => {
   // skip verfication for genesis block
   if (blockInstance.height === 0) {
     // add block to local block store
-    await blockStore.put(block.blockHash, blockInstance);
+    await blockStore.put(block.height, blockInstance);
 
     // update current block
     currentBlock = blockInstance;
     return;
   }
 
-  // verify height
-  if (blockInstance.height !== currentBlock.height + 1)
-    throw new Error('Invalid block height');
-
-  // verify previous block hash
-  if (blockInstance.previousBlockHash !== currentBlock.blockHash)
-    throw new Error('Invalid previous block hash');
-
-  // verify with state roots
-  if (blockInstance.productTrieRoot !== productTrie.root)
-    throw new Error('Invalid product trie root');
-  if (blockInstance.manufacturerTrieRoot !== manufacturerTrie.root)
-    throw new Error('Invalid manufacturer trie root');
-
-  console.log(blockInstance.blockHash);
-  // verify block difficulty and structure
-  if (!blockInstance.verify(DIFFICULTY)) throw new Error('Invalid block');
+  // verify height, previous block hash & difficulty
+  validateBlock(blockInstance);
 
   // add block to local block store
-  await blockStore.put(block.blockHash, blockInstance);
+  await blockStore.put(block.height, blockInstance);
 
   // update current block
   currentBlock = blockInstance;
 };
 
-module.exports = { mineGenesisBlock, mineNewBlock, addNewBlock };
+/**
+ * Add old blocks to blockStore
+ * @param {*} blocks old blocks
+ */
+const importBlocks = async (blocks) => {
+  // import all blocks
+  await Promise.all(
+    blocks.map(async (block) => await blockStore.put(block.height, block))
+  );
+
+  // update currentBlock
+  currentBlock = blocks[blocks.length - 1];
+};
+
+/**
+ * export old blocks from blockStore
+ * @returns old blocks
+ */
+const exportBlocks = async () => {
+  const entries = await blockStore.iterator().all();
+  const blocks = entries.map(([key, value]) => value);
+  return blocks;
+};
+
+module.exports = {
+  mineGenesisBlock,
+  mineNewBlock,
+  addNewBlock,
+  importBlocks,
+  exportBlocks,
+  validateBlock
+};
+
+function validateBlock(block) {
+  if (block.height !== currentBlock.height + 1)
+    throw new Error('Invalid block height');
+
+  // verify previous block hash
+  if (block.previousBlockHash !== currentBlock.blockHash)
+    throw new Error('Invalid previous block hash');
+
+  // verify block difficulty and structure
+  if (!block.verify(DIFFICULTY)) throw new Error('Invalid block');
+}

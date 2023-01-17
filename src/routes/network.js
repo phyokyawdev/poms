@@ -14,13 +14,12 @@ router.post('/subscribe', isThisMain, async (req, res) => {
   const { port } = req.body;
 
   const { remoteAddress } = req.socket;
-  const side_node_address = `http://${remoteAddress}:${port}`;
-  log(`new side node at ${side_node_address}`);
+  const side_node_address = `http://${remoteAddress}`;
+  log(`new side node at ${side_node_address}:${port}`);
 
   try {
-    await addNetworkNode(side_node_address);
+    await addNetworkNode(side_node_address, port);
   } catch (error) {
-    console.log(error);
     throw createHttpError(500, 'database error: nodeStore');
   }
 

@@ -33,3 +33,25 @@ LEVEL DB
 
 NETWORK NODE STORE 
 - should store list of nodes with flat file or json?
+
+USE CLASS FOR 
+- blockchain
+- block
+- use factory pattern to instantiate blockchain 
+
+
+VALIDATION
+BLOCK 
+- properties presence
+- solved?
+
+CHAIN
+- height 
+- previous hash
+- difficulty
+
+STATE
+- transaction
+- state root
+
+if any of the above failed, the state will be rolled back

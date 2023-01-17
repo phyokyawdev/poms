@@ -1,8 +1,6 @@
 const log = require('debug')('info:manufacturer service');
 const { manufacturerTrie } = require('../db');
-const { mainAccountAddress } = require('../config/keys');
-
-let currentRoot = '';
+const keys = require('../config/keys');
 
 /**
  * Enroll manufacturer's information to state
@@ -19,7 +17,7 @@ const enrollManufacturer = async (
   companyName
 ) => {
   // isAdmin?
-  if (senderAddress !== mainAccountAddress)
+  if (senderAddress !== keys.mainAccountAddress)
     throw new Error('only admin can enroll manufacturer');
 
   // is manufacturer already exist

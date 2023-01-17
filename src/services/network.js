@@ -7,40 +7,37 @@
 
 // if empty, retrieve from leveldb (consider restart)
 // upon new record, add to both memory and to leveldb
-const { default: axios } = require('axios');
 const crypto = require('crypto');
 const log = require('debug')('info:network service');
 const { nodeStore } = require('../db');
 
 const algorithm = 'sha256';
 
-const addNetworkNode = async (value) => {
+const addNetworkNode = async (ipAddress, port) => {
   const hashObj = crypto.createHash(algorithm);
-  const key = hashObj.update(value).digest();
-  await nodeStore.put(key, value);
+  const key = hashObj.update(ipAddress).digest();
+  await nodeStore.put(key, { ipAddress, port });
 };
 
-const getNetworkNode = async (value) => {
+const getNetworkNode = async (ipAddress) => {
   const hashObj = crypto.createHash(algorithm);
-  const key = hashObj.update(value).digest();
+  const key = hashObj.update(ipAddress).digest();
   const val = await nodeStore.get(key);
   return val;
 };
 
-const publishBlock = async (block) => {
-  for await (const ipAddress of nodeStore.values()) {
-    try {
-      log(`publishing to ${ipAddress}`);
-      await axios.post(`${ipAddress}/blockchain/blocks`, block);
-      log(`published block to ${ipAddress}`);
-    } catch (error) {
-      log(error.response.data);
-    }
-  }
+const getNodeAddresses = async () => {
+  const entries = await nodeStore.iterator().all();
+
+  const ipAddresses = entries.map(
+    ([_key, { ipAddress, port }]) => `${ipAddress}:${port}`
+  );
+
+  return ipAddresses;
 };
 
 module.exports = {
   addNetworkNode,
   getNetworkNode,
-  publishBlock
+  getNodeAddresses
 };

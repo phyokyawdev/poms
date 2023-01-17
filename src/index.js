@@ -7,61 +7,73 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const { default: axios } = require('axios');
 const log = require('debug')('info:index');
 const ip = require('ip');
 const keys = require('./config/keys');
 const app = require('./app');
-const { mineGenesisBlock } = require('./services/blockchain');
+const { mineGenesisBlock, importBlocks } = require('./services/blockchain');
+const {
+  subscribeToMainNode,
+  getBlocksFromMainNode
+} = require('./services/request');
+const Block = require('./services/block');
+const {
+  parseTransaction,
+  executeTransaction
+} = require('./services/transaction');
 
 const IP_ADDRESS = ip.address();
 
 /**
- * CLIENT SETUP
- * ============
+ * CLIENT STARTUP
+ * ==============
  * main node
- * - genesis block?
+ * - mine genesis block
+ * - restore old blocks?
+ * - restore old state?
  *
  * side node
- * - need main node address
- * - subscribe to main
- * - download old blocks
+ * - subscribe to main node
+ * - download old blocks from main node
  */
 
 const start = async () => {
   if (keys.nodeType === 'main') {
     log(`Starting main node with account address : ${keys.mainAccountAddress}`);
 
-    // mine genesis block
     await mineGenesisBlock();
   } else {
     log(`Starting side node with main node ip address : ${keys.mainIpAddress}`);
 
-    /**
-     * subscribe to main node
-     */
-    const res = await axios.post(`${keys.mainIpAddress}/network/subscribe`, {
-      port: keys.port
+    await subscribeToMainNode();
+
+    log(`Downloading blocks from main...`);
+    const blocks = await getBlocksFromMainNode();
+    log(`Download completed, ${blocks}`);
+
+    // parse blocks
+    const parsedBlocks = blocks.map((block) => {
+      const parsedBlock = new Block(block);
+      if (parsedBlock.height === 0) return parsedBlock;
+
+      parsedBlock.tx = parseTransaction(parsedBlock.tx);
+      return parsedBlock;
     });
-    if (res.status !== 200) throw Error('Subscription to main node failed');
-    log(`Successfully subscribed to main node`);
 
-    /**
-     * get blocks from main node
-     * and add to local blockchain
-     */
-    log(`Downloading old blocks...`);
-    try {
-      const { data } = await axios.get(
-        `${keys.mainIpAddress}/blockchain/blocks`
-      );
+    // sort block according to height
+    const sortedBlocks = parsedBlocks.sort((b1, b2) =>
+      b1.height > b2.height ? 1 : b1.height < b2.height ? -1 : 0
+    );
 
-      // blocks
-      // check height -> sort
-      // execute and add to chain one by one
-    } catch (error) {}
+    // add to local block chain
+    await importBlocks(sortedBlocks);
 
-    log(`Download completed`);
+    // update state according to blocks
+    await sortedBlocks.reduce(async (acc, elt) => {
+      if (elt.height === 0) return Promise.resolve();
+      console.log(elt);
+      await executeTransaction(elt.tx);
+    }, Promise.resolve());
   }
 
   app.listen({ port: keys.port, host: '0.0.0.0' }, () => {

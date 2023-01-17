@@ -1,13 +1,16 @@
 const log = require('debug')('info:transaction route');
-const { default: axios } = require('axios');
 const express = require('express');
 const createHttpError = require('http-errors');
-const { nodeType, mainIpAddress } = require('../config/keys');
+const keys = require('../config/keys');
 const { parseRequestTx } = require('../middlewares');
 const { executeTransaction } = require('../services/transaction');
 const { mineNewBlock } = require('../services/blockchain');
-const { publishBlock } = require('../services/network');
+const { getNodeAddresses } = require('../services/network');
 const { manufacturerTrie, productTrie } = require('../db');
+const {
+  sendTransactionToMainNode,
+  publishBlockToSideNode
+} = require('../services/request');
 
 const router = express.Router();
 
@@ -21,30 +24,35 @@ router.post('/', parseRequestTx, async (req, res) => {
   const productTrieRoot = productTrie.root;
   const manufacturerTrieRoot = manufacturerTrie.root;
 
-  // side node will delegate tx to main node
-  if (nodeType === 'side') {
-    const { status, data } = await axios.post(
-      `${mainIpAddress}/transactions`,
-      tx
-    );
-    return res.status(status).send(data);
+  if (keys.nodeType === 'side') {
+    await sendTransactionToMainNode(tx);
+    return res.send('Sent transaction to main node');
   }
 
-  // main node will handle all transactions
   let transactionResult;
   try {
     transactionResult = await executeTransaction(tx);
+    const block = await mineNewBlock(
+      tx,
+      productTrie.root,
+      manufacturerTrie.root
+    );
 
-    const block = await mineNewBlock(tx);
-
-    // broadcast new block to network (optimistic)
+    /**
+     * PUBLISH BLOCK TO SIDE NODES
+     * - optimistic approach (no fail)
+     */
     try {
-      await publishBlock(block);
+      const addresses = await getNodeAddresses();
+      addresses.forEach(
+        async (address) => await publishBlockToSideNode(address, block)
+      );
     } catch (error) {
       log(error);
     }
   } catch (error) {
-    // on error, roll back
+    log(`Failed to execute transaction, rolling state back`);
+
     productTrie.root = productTrieRoot;
     manufacturerTrie.root = manufacturerTrieRoot;
 

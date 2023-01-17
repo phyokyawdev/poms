@@ -4,8 +4,9 @@
   "description": "blockchain based product ownership management system",
   "main": "src/index.js",
   "scripts": {
-    "main": "node -r dotenv/config src/index.js -t main -a 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
-    "side": "node -r dotenv/config src/index.js -p 3001 -t side -a 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
+    "clean": "rimraf database",
+    "main": "node -r dotenv/config src/index.js -t main -m 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
+    "side": "node -r dotenv/config src/index.js -t side -m 0x8727edbea1b1622dee260ce3d05835efe3a3701d",
     "wallet": "node --experimental-repl-await wallet/index.js"
   },
   "bin": {
@@ -38,7 +39,8 @@
     "ip": "^1.1.8",
     "level": "^8.0.0",
     "merkle-patricia-tree": "^4.2.4",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "rimraf": "^4.0.5"
   },
   "devDependencies": {
     "dotenv": "^16.0.3",

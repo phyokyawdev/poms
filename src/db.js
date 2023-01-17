@@ -2,8 +2,9 @@ const { BaseTrie: Trie } = require('merkle-patricia-tree');
 const { Level } = require('level');
 const path = require('path');
 const proxyHandler = require('./trie-proxy');
+const keys = require('./config/keys');
 
-const dbPath = path.join(__dirname, '../database');
+const dbPath = path.join(__dirname, `../${keys.databasePath}`);
 const db = new Level(dbPath);
 
 /**

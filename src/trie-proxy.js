@@ -49,7 +49,7 @@ const proxyHandler = {
         return Reflect.apply(target[name], thisVal, argumentsList);
       };
     }
-    if (name === 'root') return util.bufferToHex(target[name]);
+    if (name === 'root') return target[name].toString('hex');
     return Reflect.get(target, name, receiver);
   },
   set: (target, name, value, receiver) => {

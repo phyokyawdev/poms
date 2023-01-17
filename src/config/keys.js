@@ -6,19 +6,21 @@ const { program } = require('commander');
  */
 
 program
-  .option('-p, --port <number>', 'port number', 3000)
   .requiredOption('-t, --node-type <string>', 'node type - "main" | "side"')
   .requiredOption(
-    '-a, --main-account-address <string>',
+    '-m, --main-account-address <string>',
     'address of main account(hex string)'
   )
-  .option('-i, --main-ip-address <string>', 'ip address of main account');
+  .option('-i, --main-ip-address <string>', 'ip address of main account')
+  .option('-p, --port <number>', 'port number', 3000)
+  .option('-d, --database-path <string>', 'database path', 'database');
 
 program.parse(process.argv);
 
 const options = program.opts();
 
-let { port, nodeType, mainIpAddress, mainAccountAddress } = options;
+let { port, nodeType, mainIpAddress, mainAccountAddress, databasePath } =
+  options;
 
 if (!nodeType) throw new Error('--node-type is required');
 
@@ -39,5 +41,6 @@ module.exports = {
   port,
   nodeType: lower_type,
   mainAccountAddress,
-  mainIpAddress
+  mainIpAddress,
+  databasePath
 };

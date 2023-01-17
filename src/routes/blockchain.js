@@ -1,3 +1,4 @@
+const log = require('debug')('info: blockchain route');
 const express = require('express');
 const createHttpError = require('http-errors');
 const { productTrie, manufacturerTrie } = require('../db');
@@ -8,7 +9,11 @@ const {
   isThisSide,
   parseRequestBlock
 } = require('../middlewares');
-const { addNewBlock } = require('../services/blockchain');
+const {
+  addNewBlock,
+  exportBlocks,
+  validateBlock
+} = require('../services/blockchain');
 const { executeTransaction } = require('../services/transaction');
 const router = express.Router();
 
@@ -18,8 +23,7 @@ const router = express.Router();
  * - handle getAllBlocks requests from side nodes
  */
 router.get('/blocks', isThisMain, allowSideNode, async (req, res) => {
-  const blocks = { blocks: [] };
-  // create leveldb stream and post to /blocks
+  const blocks = await exportBlocks();
   res.send(blocks);
 });
 
@@ -36,19 +40,30 @@ router.post(
   async (req, res) => {
     const block = req.block;
 
-    console.log(`new block received: ${block.blockHash}`);
+    log(`new block received: ${block.blockHash}`);
 
     // cache old state
     const productTrieRoot = productTrie.root;
     const manufacturerTrieRoot = manufacturerTrie.root;
 
     try {
+      // validate with chain
+      validateBlock(block);
+
       // update state via executing tx
       await executeTransaction(block.tx);
+
+      // validate with state root
+      if (block.productTrieRoot !== productTrie.root)
+        throw new Error('Product trie root mismatched');
+      if (block.manufacturerTrieRoot !== manufacturerTrie.root)
+        throw new Error('Manufacturer trie root mismatched');
 
       // add block to blockchain
       await addNewBlock(block);
     } catch (error) {
+      log(`Failed to process block, rolling state back`);
+
       // on error, roll back
       productTrie.root = productTrieRoot;
       manufacturerTrie.root = manufacturerTrieRoot;

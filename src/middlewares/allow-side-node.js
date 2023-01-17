@@ -8,8 +8,8 @@ const { getNetworkNode } = require('../services/network');
  */
 const allowSideNode = async (req, res, next) => {
   // check requester is registered side node or not
-  const { remoteAddress, remotePort } = req.socket;
-  const side_node_address = `http://${remoteAddress}:${remotePort}`;
+  const { remoteAddress } = req.socket;
+  const side_node_address = `http://${remoteAddress}`;
 
   const subscribed_node = await getNetworkNode(side_node_address);
 
