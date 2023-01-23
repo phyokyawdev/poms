@@ -7,11 +7,19 @@ const transactionRouter = require('./routes/transactions');
 const networkRouter = require('./routes/network');
 const informationRouter = require('./routes/information');
 const { handleError } = require('./middlewares');
+const actuator = require('express-actuator');
 
 const app = express();
 
 // log request
-app.use(morgan('dev'));
+app.use(
+  morgan(
+    ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length]'
+  )
+);
+
+// health check routes - info, metrics, health
+app.use(actuator());
 
 // parse request
 app.use(express.json());
