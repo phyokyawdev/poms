@@ -1,4 +1,5 @@
 const express = require('express');
+const log = require('debug')('info:information route');
 const { manufacturerTrie, productTrie } = require('../db');
 
 const router = express.Router();
@@ -18,6 +19,13 @@ router.get('/manufacturers/:companyPrefix', async (req, res) => {
   const manufacturerInfo = await manufacturerTrie.get(manufacturerAddress);
 
   res.send(manufacturerInfo);
+});
+
+router.get('/connections/:address', async (req, res) => {
+  const address = req.params.address;
+  log('account address: ', address);
+
+  res.send(`Connected to POMS as ${address}`);
 });
 
 module.exports = router;
