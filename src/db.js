@@ -4,7 +4,7 @@ const path = require('path');
 const proxyHandler = require('./trie-proxy');
 const keys = require('./config/keys');
 
-const dbPath = path.join(__dirname, `../${keys.databasePath}`);
+const dbPath = path.join(__dirname, `../database/${keys.databasePath}`);
 const db = new Level(dbPath);
 
 /**
