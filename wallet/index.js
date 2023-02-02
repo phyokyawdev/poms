@@ -89,6 +89,21 @@ cli.context.receiveProductByUserTwoTx = transaction.create(userTwoPrivateKey, {
 });
 
 /**
+ * Create enrollManufacturerTx for better reusability
+ */
+cli.context.createEnrollManufacturerTx = (
+  manufacturerAddress,
+  companyPrefix
+) => {
+  const tx = transaction.create(adminPrivateKey, {
+    methodName: 'enrollManufacturer',
+    payloads: [manufacturerAddress, companyPrefix, 'Example Company']
+  });
+
+  return tx;
+};
+
+/**
  * DISPLY OF CONSOLE
  */
 console.log('WALLET REPL');
