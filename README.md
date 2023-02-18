@@ -77,7 +77,7 @@ The ip address of the main node will be shown upon start up.
 
 Run side node with:
 ```
-npm run side -- -m <main-account-address> --i <main-node-ip-address> -d <storage-path> -p <port-number>
+npm run side -- -m <main-account-address> -i <main-node-ip-address> -d <storage-path> -p <port-number>
 ```
 Replace `main-account-address` with the `address` string you used to run the main node.
 
