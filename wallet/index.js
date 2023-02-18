@@ -30,6 +30,7 @@ const userTwoPrivateKey =
 /**
  * ADDRESSES
  */
+const adminAddress = '0x8727edbea1b1622dee260ce3d05835efe3a3701d';
 const manufacturerAddress = '0x237d68165c86db2f394ef7b6a8708ae85a4be3ba';
 const userOneAddress = '0x2eb36426bb9a5b4ba8c2b620d0402999549d6b2c';
 const userTwoAddress = '0x2c623c2965c2800cfc220899d16227487dff5841';
